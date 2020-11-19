@@ -1,0 +1,93 @@
+Reto 1
+* Propiedades que no permitan fiestas.
+client = MongoClient('mongodb+srv://introabd:introabd1234@cluster0.st3u8.mongodb.net/test?authSource=admin&replicaSet=atlas-10a0so-shard-0&connectTimeoutMS=600000&socketTimeoutMS=6000000&readPreference=primary&appname=MongoDB%20Compass&ssl=true')
+filter={
+    'house_rules': re.compile(r"no parties(?i)")
+}
+result = client['sample_airbnb']['listingsAndReviews'].find(
+  filter=filter
+)
+
+* Propiedades que admitan mascotas.
+client = MongoClient('mongodb+srv://introabd:introabd1234@cluster0.st3u8.mongodb.net/test?authSource=admin&replicaSet=atlas-10a0so-shard-0&connectTimeoutMS=600000&socketTimeoutMS=6000000&readPreference=primary&appname=MongoDB%20Compass&ssl=true')
+filter={
+    '$and': [
+        {
+            'house_rules': {
+                '$not': re.compile(r"no pets?(?i)")
+            }
+        }, {
+            'house_rules': re.compile(r"pets? allowed(?i)")
+        }
+    ]
+}
+result = client['sample_airbnb']['listingsAndReviews'].find(
+  filter=filter
+)
+
+* Propiedades que no permitan fumadores.
+client = MongoClient('mongodb+srv://introabd:introabd1234@cluster0.st3u8.mongodb.net/test?authSource=admin&replicaSet=atlas-10a0so-shard-0&connectTimeoutMS=600000&socketTimeoutMS=6000000&readPreference=primary&appname=MongoDB%20Compass&ssl=true')
+filter={
+    'house_rules': re.compile(r"no smoking(?i)")
+}
+result = client['sample_airbnb']['listingsAndReviews'].find(
+  filter=filter
+)
+
+* Propiedades que no permitan fiestas ni fumadores.
+client = MongoClient('mongodb+srv://introabd:introabd1234@cluster0.st3u8.mongodb.net/test?authSource=admin&replicaSet=atlas-10a0so-shard-0&connectTimeoutMS=600000&socketTimeoutMS=6000000&readPreference=primary&appname=MongoDB%20Compass&ssl=true')
+filter={
+    '$and': [
+        {
+            'house_rules': re.compile(r"no smoking(?i)")
+        }, {
+            'house_rules': re.compile(r"no parties(?i)")
+        }
+    ]
+}
+result = client['sample_airbnb']['listingsAndReviews'].find(
+  filter=filter
+)
+
+Reto 2
+* Usando la colección sample_airbnb.listingsAndReviews, agrega un filtro que permita obtener todas las publicaciones que tengan 50 o más comentarios, que la valoración sea mayor o igual a 80, que cuenten con conexión a Internet vía cable y estén ubicada en Brazil.
+client = MongoClient('mongodb+srv://introabd:introabd1234@cluster0.st3u8.mongodb.net/test?authSource=admin&replicaSet=atlas-10a0so-shard-0&connectTimeoutMS=600000&socketTimeoutMS=6000000&readPreference=primary&appname=MongoDB%20Compass&ssl=true')
+filter={
+    'number_of_reviews': {
+        '$gte': 50
+    }, 
+    'review_scores.review_scores_rating': {
+        '$gte': 80
+    }, 
+    'amenities': {
+        '$in': [
+            re.compile(r"Ethernet")
+        ]
+    }, 
+    'address.country_code': 'BR'
+}
+result = client['sample_airbnb']['listingsAndReviews'].find(
+  filter=filter
+)
+
+Reto 3
+* Usando la colección sample_airbnb.listingsAndReviews, mediante el uso de agregaciones, encontrar el número de publicaciones que tienen conexión a Internet, sea desde Wifi o desde cable (Ethernet).
+client = MongoClient('mongodb+srv://introabd:introabd1234@cluster0.st3u8.mongodb.net/test?authSource=admin&replicaSet=atlas-10a0so-shard-0&connectTimeoutMS=600000&socketTimeoutMS=6000000&readPreference=primary&appname=MongoDB%20Compass&ssl=true')
+result = client['sample_airbnb']['listingsAndReviews'].aggregate([
+    {
+        '$match': {
+            'amenities': {
+                '$in': [
+                    re.compile(r"Wifi(?i)"), re.compile(r"Ethernet(?i)")
+                ]
+            }
+        }
+    }, {
+        '$group': {
+            '_id': None, 
+            'total': {
+                '$sum': 1
+            }
+        }
+    }
+])
